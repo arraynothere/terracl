@@ -48,10 +48,9 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - uses: taiki-e/install-action@v2
+      - name: Install cargo-ndk
         if: matrix.cross
-        with:
-          tool: cross
+        run: cargo install cargo-ndk --locked
 
       - name: Test
         if: "!matrix.cross"
@@ -61,7 +60,7 @@ jobs:
         shell: bash
         run: |
           if [ "${{ matrix.cross }}" = "true" ]; then
-            cross build --release --target ${{ matrix.target }}
+            ANDROID_NDK_HOME="$ANDROID_NDK_LATEST_HOME" cargo ndk --platform 24 -t arm64-v8a build --release
           else
             cargo build --release --target ${{ matrix.target }}
           fi
