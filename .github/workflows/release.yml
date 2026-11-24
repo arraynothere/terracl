@@ -1,0 +1,204 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tag matches Cargo.toml version
+        run: |
+          version=$(grep -m1 '^version' Cargo.toml | cut -d '"' -f2)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match Cargo.toml version $version"
+            exit 1
+          fi
+
+  binaries:
+    name: ${{ matrix.target }}
+    needs: verify
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            cross: false
+          - os: ubuntu-22.04-arm
+            target: aarch64-unknown-linux-gnu
+            cross: false
+          - os: ubuntu-22.04
+            target: aarch64-linux-android
+            cross: true
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            cross: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: taiki-e/install-action@v2
+        if: matrix.cross
+        with:
+          tool: cross
+
+      - name: Test
+        if: "!matrix.cross"
+        run: cargo test --release
+
+      - name: Build
+        shell: bash
+        run: |
+          if [ "${{ matrix.cross }}" = "true" ]; then
+            cross build --release --target ${{ matrix.target }}
+          else
+            cargo build --release --target ${{ matrix.target }}
+          fi
+
+      - name: Package
+        shell: bash
+        run: |
+          name="terracl-${{ github.ref_name }}-${{ matrix.target }}"
+          mkdir "$name"
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            cp "target/${{ matrix.target }}/release/terracl.exe" "$name/"
+          else
+            cp "target/${{ matrix.target }}/release/terracl" "$name/"
+          fi
+          cp README.md LICENSE "$name/"
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            7z a "$name.zip" "$name"
+            echo "ASSET=$name.zip" >> "$GITHUB_ENV"
+          else
+            tar czf "$name.tar.gz" "$name"
+            echo "ASSET=$name.tar.gz" >> "$GITHUB_ENV"
+          fi
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ASSET }}
+          generate_release_notes: true
+
+  deb:
+    name: deb ${{ matrix.arch }}
+    needs: verify
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            arch: amd64
+          - os: ubuntu-22.04-arm
+            arch: arm64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deb
+
+      - name: Build package
+        run: cargo deb
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: debs-${{ matrix.arch }}
+          path: target/debian/*.deb
+          if-no-files-found: error
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: target/debian/*.deb
+          generate_release_notes: true
+
+  apt-repo:
+    name: publish apt repository
+    needs: deb
+    runs-on: ubuntu-latest
+    concurrency:
+      group: apt-repo
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: debs-*
+          merge-multiple: true
+          path: debs
+
+      - name: Install reprepro
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y reprepro gnupg
+
+      - name: Import signing key
+        env:
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+        run: |
+          if [ -z "$APT_GPG_PRIVATE_KEY" ]; then
+            echo "::error::Secret APT_GPG_PRIVATE_KEY is not set"
+            exit 1
+          fi
+          echo "$APT_GPG_PRIVATE_KEY" | gpg --batch --import
+          key=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr/ {print $10; exit}')
+          echo "KEY_ID=$key" >> "$GITHUB_ENV"
+
+      - name: Build signed repository
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          project="${GITHUB_REPOSITORY#*/}"
+          base="https://${owner}.github.io/${project}"
+          mkdir -p repo/conf site
+          cat > repo/conf/distributions <<DIST
+          Origin: TerraCL
+          Label: TerraCL
+          Codename: stable
+          Architectures: amd64 arm64
+          Components: main
+          Description: TerraCL APT repository
+          SignWith: ${KEY_ID}
+          DIST
+          sed -i 's/^ *//' repo/conf/distributions
+          reprepro -b repo includedeb stable debs/*.deb
+          cp -r repo/dists repo/pool site/
+          gpg --export "$KEY_ID" > site/terracl.gpg
+          gpg --armor --export "$KEY_ID" > site/terracl.asc
+          touch site/.nojekyll
+          cat > site/index.html <<PAGE
+          <!doctype html>
+          <meta charset="utf-8">
+          <title>TerraCL APT repository</title>
+          <h1>TerraCL APT repository</h1>
+          <pre>
+          sudo install -d -m 0755 /usr/share/keyrings
+          curl -fsSL ${base}/terracl.gpg | sudo tee /usr/share/keyrings/terracl.gpg &gt;/dev/null
+          echo "deb [signed-by=/usr/share/keyrings/terracl.gpg] ${base} stable main" | sudo tee /etc/apt/sources.list.d/terracl.list
+          sudo apt update
+          sudo apt install terracl
+          </pre>
+          PAGE
+          sed -i 's/^ *//' site/index.html
+          test -f site/dists/stable/InRelease
+          test -f site/dists/stable/Release.gpg
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site
+          force_orphan: true
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_message: "apt repository for ${{ github.ref_name }}"

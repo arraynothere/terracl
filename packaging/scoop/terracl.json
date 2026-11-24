@@ -1,0 +1,23 @@
+{
+    "version": "0.1.0",
+    "description": "Lightweight terminal code editor with file tree and multi-encoding support",
+    "homepage": "https://github.com/arraynothere/terracl",
+    "license": "MIT",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/arraynothere/terracl/releases/download/v0.1.0/terracl-v0.1.0-x86_64-pc-windows-msvc.zip",
+            "hash": "REPLACE_WITH_SHA256_OF_ZIP",
+            "extract_dir": "terracl-v0.1.0-x86_64-pc-windows-msvc"
+        }
+    },
+    "bin": "terracl.exe",
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/arraynothere/terracl/releases/download/v$version/terracl-v$version-x86_64-pc-windows-msvc.zip",
+                "extract_dir": "terracl-v$version-x86_64-pc-windows-msvc"
+            }
+        }
+    }
+}

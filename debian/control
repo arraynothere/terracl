@@ -1,0 +1,14 @@
+Source: terracl
+Section: editors
+Priority: optional
+Maintainer: arraynothere <arraynothere@users.noreply.github.com>
+Build-Depends: debhelper-compat (= 13), cargo, rustc
+Standards-Version: 4.6.2
+Homepage: https://github.com/arraynothere/terracl
+
+Package: terracl
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Modern terminal code editor with file tree sidebar
+ Lightweight CLI code editor built with Rust, featuring line numbers,
+ syntax highlighting, multi-encoding support, and an integrated file explorer.

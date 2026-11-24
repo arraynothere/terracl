@@ -1,0 +1,40 @@
+[package]
+name = "terracl"
+version = "0.1.0"
+edition = "2021"
+authors = ["arraynothere <https://github.com/arraynothere>"]
+description = "Lightweight, modern CLI code editor with file tree and multi-encoding support"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/arraynothere/terracl"
+keywords = ["editor", "terminal", "tui", "cli"]
+categories = ["command-line-utilities", "text-editors"]
+
+[dependencies]
+anyhow = "1.0.89"
+crossterm = "0.28.1"
+encoding_rs = "0.8.34"
+ratatui = "0.29.0"
+ropey = "1.6.1"
+syntect = { version = "5.2.0", default-features = false, features = ["default-fancy"] }
+unicode-width = "0.2.0"
+walkdir = "2.5.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[package.metadata.deb]
+maintainer = "arraynothere <arraynothere@users.noreply.github.com>"
+copyright = "2026, arraynothere"
+license-file = ["LICENSE", "0"]
+extended-description = "Lightweight terminal code editor with a file tree sidebar, syntax highlighting, undo and redo, and multi-encoding support."
+depends = "$auto"
+section = "editors"
+priority = "optional"
+assets = [
+    ["target/release/terracl", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/terracl/README.md", "644"],
+]

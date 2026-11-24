@@ -1,0 +1,9 @@
+/target
+*.deb
+debian/.debhelper/
+debian/terracl/
+debian/files
+debian/*.log
+debian/*.substvars
+debian/debhelper-build-stamp
+terracl-apt-private.asc

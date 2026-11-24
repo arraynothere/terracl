@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_build:
+	cargo build --release
+
+override_dh_auto_install:
+	install -Dm755 target/release/terracl debian/terracl/usr/bin/terracl
+
+override_dh_auto_clean:
+	cargo clean
