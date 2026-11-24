@@ -1,0 +1,11 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>TerraCL APT repository</title>
+<h1>TerraCL APT repository</h1>
+<pre>
+sudo install -d -m 0755 /usr/share/keyrings
+curl -fsSL https://arraynothere.github.io/terracl/terracl.gpg | sudo tee /usr/share/keyrings/terracl.gpg &gt;/dev/null
+echo "deb [signed-by=/usr/share/keyrings/terracl.gpg] https://arraynothere.github.io/terracl stable main" | sudo tee /etc/apt/sources.list.d/terracl.list
+sudo apt update
+sudo apt install terracl
+</pre>

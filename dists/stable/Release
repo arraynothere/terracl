@@ -1,0 +1,28 @@
+Origin: TerraCL
+Label: TerraCL
+Codename: stable
+Date: Tue, 24 Nov 2026 12:11:41 UTC
+Architectures: amd64 arm64
+Components: main
+Description: TerraCL APT repository
+MD5Sum:
+ 1a464d801ac25318561d4012d974c803 699 main/binary-amd64/Packages
+ d7a9f988f42cf5e4260ab5676abcd96a 460 main/binary-amd64/Packages.gz
+ 68eb11731bc4b68a89ae00374dc0c480 103 main/binary-amd64/Release
+ 6d22ba4e0d5b274436f4a585ab422851 699 main/binary-arm64/Packages
+ b60e08c66bd02847a72ccbe6785fd901 461 main/binary-arm64/Packages.gz
+ 2b4beb4e85987b0776ba9339b3602bd8 103 main/binary-arm64/Release
+SHA1:
+ c2767279d29c0e0cc2fd91c906a31461682000f9 699 main/binary-amd64/Packages
+ e66689561948e29f8965c6d3a1e89ccf5b6ad7a2 460 main/binary-amd64/Packages.gz
+ 1fdcba31400f39be781c709aa11cb616114f1639 103 main/binary-amd64/Release
+ 5788f33397bd4e3b1ecee700e6bb2d0332e33e4f 699 main/binary-arm64/Packages
+ eb48aadcf477096bf99d7d38f26cef7c310ec397 461 main/binary-arm64/Packages.gz
+ a1d6d791fe3ce686000fcb4d7e2253d8625798c5 103 main/binary-arm64/Release
+SHA256:
+ cb37a024f281845a283d37a23a9a43dc2a7cb3f38de5163e0d94b16b786619ca 699 main/binary-amd64/Packages
+ c73041013e332c2667f50a2be8c6649409f2798406628fd26de5fd9bbe2eed77 460 main/binary-amd64/Packages.gz
+ 665b5892166a0bd53fbe8ffb6a1390ab89be7c67c5e5e69a9891909458bcba33 103 main/binary-amd64/Release
+ 128104e31da48e50dd9d3f7481d72a252df38acaf70c303551c875ea5571ec10 699 main/binary-arm64/Packages
+ a09a7d627dbdf7ba376952bc0f6a9c48cce828f2b4b3f160a8d9a9f22da7ff26 461 main/binary-arm64/Packages.gz
+ 0f2c22626faf031a8da1a0bad627d1c9dcf2845085855a244ba8ddd12422d7ce 103 main/binary-arm64/Release

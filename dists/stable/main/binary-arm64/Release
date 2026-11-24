@@ -1,0 +1,5 @@
+Component: main
+Origin: TerraCL
+Label: TerraCL
+Architecture: arm64
+Description: TerraCL APT repository

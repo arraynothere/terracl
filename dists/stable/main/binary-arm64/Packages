@@ -1,0 +1,18 @@
+Package: terracl
+Version: 0.1.0-1
+Architecture: arm64
+Homepage: https://github.com/arraynothere/terracl
+Maintainer: arraynothere <arraynothere@users.noreply.github.com>
+Installed-Size: 3030
+Depends: libc6 (>= 2.34)
+Priority: optional
+Section: editors
+Filename: pool/main/t/terracl/terracl_0.1.0-1_arm64.deb
+Size: 1219352
+SHA256: 434a08cf2d3b1ff3956007733e47580b9d80689d1487eb003b80166dc308ce11
+SHA1: b999566afd1bff54da17eca41f5c15ed0698a5a5
+MD5sum: fd375db43ef68874e731338c585ca698
+Description: Lightweight, modern CLI code editor with file tree and multi-encoding support
+ Lightweight terminal code editor with a file tree sidebar, syntax highlighting,
+ undo and redo, and multi-encoding support.
+
